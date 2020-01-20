@@ -5,7 +5,7 @@
 HostEdit is a command line utility for editing Windows HOSTS file. it can edit(add/remove) single entry in host file. HostEdit also supports
 adding/removing mutiple hosts file entries reading from text file. HostEdit is written in Delphi, Compiled using Embarcadero's Delphi 10.3.
 
-Features:
+<b>Features:</b>
 
 ```
   1. Add/Remove single entry in HOSTS file.
@@ -14,7 +14,7 @@ Features:
   4. Restore HOSTS file to windows default.
   5. Change attributes of HOSTS file.
 ```
-Usage :
+<b>Usage :</b>
 ```
   /a     : Add single entry.
   /r     : Remove single entry.
@@ -24,7 +24,7 @@ Usage :
   /res   : Restore HOSTS file to Windows default.
   /attr  : Set attributes for HOSTS file, ReadOnly(/attr r), Archive(/attr a), Both(/attr ra).
 ```
-Samples :
+<b>Samples :</b>
 ```
   hostsedit /a 0.0.0.0 wwww.example-domain.com
   hostsedit /r 0.0.0.0 wwww.example-domain.com
@@ -34,7 +34,7 @@ Samples :
   hostsedit /res
   hostsedit /attr r
 ```
-Sample Text file for editing(add/remove) multiple entries :
+<b>Sample Text file for editing(add/remove) multiple entries :</b>
 ```
 0.0.0.0 c3.zedo.com
 0.0.0.0 c4.zedo.com
@@ -55,7 +55,7 @@ Sample Text file for editing(add/remove) multiple entries :
 
 
 
-Download[v1.0] : <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4086261/hostsedit.zip">Click Here.</a>
+<b>Download[v1.0] :</b> <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4086261/hostsedit.zip">Click Here.</a>
 
 
 
