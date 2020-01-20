@@ -159,6 +159,9 @@ readln(edit,hsites[I-1]);
 end;
 
 CloseFile(edit);
+if not DirectoryExists(ExtractFileDir(loc)) then
+CreateDir(ExtractFileDir(loc));
+
 AssignFile(edit,loc);
 Rewrite(edit);
 for I := Low(hsites) to High(hsites) do
@@ -166,9 +169,13 @@ Writeln(edit,hsites[I]);
 closefile(edit);
 end;
 
-procedure Restore;
+procedure Restore(loc: String='');
 var
 edit: TextFile;
+sites: array of string;
+I: Integer;
+begin
+if loc='' then
 begin
 AssignFile(edit,host);
 Rewrite(edit);
@@ -194,6 +201,26 @@ Writeln(edit,'# localhost name resolution is handled within DNS itself.');
 Writeln(edit,'#	127.0.0.1       localhost');
 Writeln(edit,'#	::1             localhost');
 closefile(edit);
+end
+else
+begin
+I:=0;
+AssignFile(edit,loc);
+Reset(edit);
+while not Eof(edit) do
+begin
+  Inc(I,1);
+  SetLength(sites,I);
+  readln(edit,sites[I-1]);
+end;
+CloseFile(edit);
+
+AssignFile(edit,host);
+Rewrite(edit);
+for I := Low(sites) to High(sites) do
+Writeln(edit,sites[I]);
+closefile(edit);
+end;
 end;
 
 procedure SetAttrib(attrib: String);
@@ -208,7 +235,7 @@ end;
 
 begin
 try
-  SetConsoleTitle('hostsedit 1.0');
+  SetConsoleTitle('hostsedit 1.1');
   host:=GetEnvironmentVariable('WINDIR')+'\System32\drivers\etc\hosts';
   if ParamStr(1)='/a' then
   begin
@@ -249,6 +276,9 @@ try
   begin
   FileSetAttr(host, faArchive);
   ShowWindow(GetConsoleWindow, SW_HIDE);
+  if ParamCount>1 then
+  Restore(ParamStr(2))
+  else
   Restore;
   Exit;
   end;
@@ -268,7 +298,7 @@ Writeln('  /r     : Remove single entry.');
 Writeln('  /am    : Add multiple entries, reading from text file.');
 Writeln('  /rm    : Remove multiple entries, reading from text file.');
 Writeln('  /b     : Create backup of HOSTS file.');
-Writeln('  /res   : Restore HOSTS file to Windows default.');
+Writeln('  /res   : Restore HOSTS file to Windows default, or to a previous backup.');
 Writeln('  /attr  : Set attributes for HOSTS file, ReadOnly(/attr r), Archive(/attr a), Both(/attr ra).');
 Writeln('');
 Writeln('Samples :');
@@ -279,6 +309,7 @@ Writeln('  hostsedit /am "D:\HOSTS Entries\example.txt"');
 Writeln('  hostsedit /rm "D:\HOSTS Entries\example.txt"');
 Writeln('  hostsedit /b "D:\HOSTS.BKP"');
 Writeln('  hostsedit /res');
+Writeln('  hostsedit /res "D:\HOSTS.BKP"');
 Writeln('  hostsedit /attr r');
 Writeln('');
 Writeln('');
