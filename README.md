@@ -2,7 +2,7 @@
 
 <img align="center" src="https://i.imgur.com/yW6WR9S.png">
 
-HostsEdit is a command line utility for editing Windows HOSTS file. it can be used to edit(add/remove) single or multiple entries in hosts file. it also has some additional features as creating hosts file backup, restoring it to Windows default, or to a previous backup and changing attributes of hosts file. HostsEdit is written in Delphi, Compiled using Embarcadero's Delphi 10.3.3.
+HostsEdit is a command-line utility for editing Windows HOSTS file. it can be used to edit(add/remove) single or multiple entries in hosts file. it also has some additional features as creating hosts file backup, restoring hosts file to Windows default or to a previous backup and changing attributes of hosts file. HostsEdit is written in Delphi, Compiled using Embarcadero's Delphi 10.3.3.
 
 <b>Features:</b>
 
@@ -25,8 +25,8 @@ HostsEdit is a command line utility for editing Windows HOSTS file. it can be us
 ```
 <b>Samples:</b>
 ```
-  hostsedit /a 0.0.0.0 wwww.example-domain.com
-  hostsedit /r 0.0.0.0 wwww.example-domain.com
+  hostsedit /a 0.0.0.0 www.example-domain.com
+  hostsedit /r 0.0.0.0 www.example-domain.com
   hostsedit /am "D:\HOSTS Entries\example.txt"
   hostsedit /rm "D:\HOSTS Entries\example.txt"
   hostsedit /b "D:\HOSTS.BKP"
@@ -50,12 +50,12 @@ HostsEdit is a command line utility for editing Windows HOSTS file. it can be us
 0.0.0.0 gw.zedo.com
 ```
 
-<img align="center" src="https://i.postimg.cc/nLSp0TM7/sshot-5.png">
+<img align="center" src="https://i.postimg.cc/2SdzdBqD/sshot-6.png">
 
 
 
 
-<b>Download[v1.2] :</b> <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4097823/hostsedit.zip">Click Here.</a>
+<b>Download[v1.2] :</b> <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4098282/hostsedit.zip">Click Here.</a>
 
 
 
