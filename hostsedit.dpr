@@ -316,8 +316,8 @@ begin
     Writeln('');
     Writeln('Samples :');
     Writeln('');
-    Writeln('  hostsedit /a 0.0.0.0 wwww.example-domain.com');
-    Writeln('  hostsedit /r 0.0.0.0 wwww.example-domain.com ');
+    Writeln('  hostsedit /a 0.0.0.0 www.example-domain.com');
+    Writeln('  hostsedit /r 0.0.0.0 www.example-domain.com ');
     Writeln('  hostsedit /am "D:\HOSTS Entries\example.txt"');
     Writeln('  hostsedit /rm "D:\HOSTS Entries\example.txt"');
     Writeln('  hostsedit /b "D:\HOSTS.BKP"');
