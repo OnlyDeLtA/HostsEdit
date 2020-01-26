@@ -1,4 +1,5 @@
 
+
 # HostsEdit
 
 <img align="center" src="https://i.imgur.com/yW6WR9S.png">
@@ -42,19 +43,29 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
 0.0.0.0 c6.zedo.com
 0.0.0.0 c7.zedo.com
 0.0.0.0 c8.zedo.com
-0.0.0.0 d2.zedo.com
-0.0.0.0 d3.zedo.com
-0.0.0.0 d7.zedo.com
-0.0.0.0 d8.zedo.com
-0.0.0.0 g.zedo.com
-0.0.0.0 gw.zedo.com
+```
+**Using HostsEdit with Inno Setup:**
+```
+//Edit Single Entry:
+
+[Run]
+Filename: "{app}\hostsedit.exe"; Parameters: "/a 0.0.0.0 www.google.com"; Flags: runhidden;
+[UninstallRun]
+Filename: "{app}\hostsedit.exe"; Parameters: "/r 0.0.0.0 www.google.com"; Flags: runhidden;
+
+//Edit Multiple Entries:
+
+[Run]
+Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: runhidden;
+[UninstallRun]
+Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
 
-<img align="center" src="https://i.postimg.cc/2SdzdBqD/sshot-6.png">
+<img align="center" src="https://i.postimg.cc/1zH6jt1d/sshot-8.png">
 
 
 
 
-**Download[v1.2] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4098282/hostsedit.zip">Click Here.</a>
+**Download[v1.3] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4098282/hostsedit.zip">Click Here.</a>
 
-*For Windows XP, Vista, 7, 8, 10 (32\64-bit)*
+*For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*

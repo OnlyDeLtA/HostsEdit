@@ -4,19 +4,23 @@ program hostsedit;
 {$R *.res}
 
 uses
-  System.SysUtils, Winapi.Windows;
+  System.SysUtils, Winapi.Windows, System.StrUtils, System.RegularExpressions;
 
 var
   host: string;
   attrib: Integer;
-function GetConsoleWindow: HWND; stdcall; external kernel32;
+  RegularExpression: TRegEx;
+  Match: TMatch;
+  regex1: string = '^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+[^#\s]*';
+  regex2: string = '^\h+';
+  regex3: string = '(?<=.) +(?<=.)';
 
 function CheckStr(str: string; sites: array of string): Boolean;
 var
   I: Integer;
 begin
   for I := Low(sites) to High(sites) do
-    if str = sites[I] then
+    if ContainsText(sites[I],str) then
       Exit(False);
   Exit(True);
 end;
@@ -26,15 +30,25 @@ var
   edit: TextFile;
   hsites: array of string;
   I: Integer;
+  str: string;
 begin
+  RegularExpression.Create(regex1);
   I := 0;
   AssignFile(edit, host);
   Reset(edit);
   while not Eof(edit) do
   begin
-    Inc(I, 1);
-    SetLength(hsites, I);
-    readln(edit, hsites[I - 1]);
+    Readln(edit, str);
+    Match := RegularExpression.Match(str);
+    if Match.Success then
+    begin
+      Inc(I, 1);
+      str := Match.Value;
+      SetLength(hsites, I);
+      str := TRegEx.Replace(str, regex2, '');
+      str := TRegEx.Replace(str, regex3, ' ');
+      hsites[I - 1] := str;
+    end;
   end;
   CloseFile(edit);
   AssignFile(edit, host);
@@ -46,44 +60,66 @@ end;
 
 procedure Remove(site: string);
 var
-  hsites: array of string;
+  hsites, osites: array of string;
   edit: TextFile;
   I: Integer;
+  str: string;
 begin
+  RegularExpression.Create(regex1);
   I := 0;
   AssignFile(edit, host);
   Reset(edit);
   while not Eof(edit) do
   begin
+    Readln(edit, str);
+    Match := RegularExpression.Match(str);
     Inc(I, 1);
     SetLength(hsites, I);
-    readln(edit, hsites[I - 1]);
+    SetLength(osites, I);
+    osites[I - 1] := str;
+    if Match.Success then
+    begin
+      str := Match.Value;
+      str := TRegEx.Replace(str, regex2, '');
+      str := TRegEx.Replace(str, regex3, ' ');
+      hsites[I - 1] := str;
+      Continue;
+    end;
+    hsites[I - 1] := str;
   end;
   CloseFile(edit);
   AssignFile(edit, host);
   Rewrite(edit);
   for I := Low(hsites) to High(hsites) do
-    if hsites[I] <> site then
-      Writeln(edit, hsites[I]);
+    if not ContainsText(hsites[I],site) then
+      Writeln(edit, osites[I]);
   CloseFile(edit);
 end;
 
 procedure AddFromText(lhost: String);
 var
-  txtfile: TextFile;
-  edit: TextFile;
-  sites: array of string;
-  hsites: array of String;
+  txtfile, edit: TextFile;
+  sites, hsites: array of string;
+  str: string;
   I: Integer;
 begin
+  RegularExpression.Create(regex1);
   I := 0;
   AssignFile(txtfile, lhost);
   Reset(txtfile);
   while not Eof(txtfile) do
   begin
-    Inc(I, 1);
-    SetLength(sites, I);
-    readln(txtfile, sites[I - 1]);
+    Readln(txtfile, str);
+    Match := RegularExpression.Match(str);
+    if Match.Success then
+    begin
+      Inc(I, 1);
+      SetLength(sites, I);
+      str := Match.Value;
+      str := TRegEx.Replace(str, regex2, '');
+      str := TRegEx.Replace(str, regex3, ' ');
+      sites[I - 1] := str;
+    end;
   end;
   CloseFile(txtfile);
   I := 0;
@@ -91,9 +127,17 @@ begin
   Reset(edit);
   while not Eof(edit) do
   begin
-    Inc(I, 1);
-    SetLength(hsites, I);
-    readln(edit, hsites[I - 1]);
+    Readln(edit, str);
+    Match := RegularExpression.Match(str);
+    if Match.Success then
+    begin
+      Inc(I, 1);
+      SetLength(hsites, I);
+      str := Match.Value;
+      str := TRegEx.Replace(str, regex2, '');
+      str := TRegEx.Replace(str, regex3, ' ');
+      hsites[I - 1] := str;
+    end;
   end;
   CloseFile(edit);
   AssignFile(edit, host);
@@ -106,36 +150,56 @@ end;
 
 procedure RemoveFromText(lhost: String);
 var
-  sites: array of string;
-  hsites: array of string;
-  edit: TextFile;
-  txtfile: TextFile;
+  sites, hsites, osites: array of string;
+  txtfile, edit: TextFile;
+  str: string;
   I: Integer;
 begin
+  RegularExpression.Create(regex1);
   I := 0;
   AssignFile(txtfile, lhost);
   Reset(txtfile);
   while not Eof(txtfile) do
   begin
-    Inc(I, 1);
-    SetLength(sites, I);
-    readln(txtfile, sites[I - 1]);
+    Readln(txtfile, str);
+    Match := RegularExpression.Match(str);
+    if Match.Success then
+    begin
+      Inc(I, 1);
+      SetLength(sites, I);
+      str := Match.Value;
+      str := TRegEx.Replace(str, regex2, '');
+      str := TRegEx.Replace(str, regex3, ' ');
+      sites[I - 1] := str;
+    end;
   end;
   I := 0;
   AssignFile(edit, host);
   Reset(edit);
   while not Eof(edit) do
   begin
+    Readln(edit, str);
+    Match := RegularExpression.Match(str);
     Inc(I, 1);
     SetLength(hsites, I);
-    readln(edit, hsites[I - 1]);
+    SetLength(osites, I);
+    osites[I - 1] := str;
+    if Match.Success then
+    begin
+      str := Match.Value;
+      str := TRegEx.Replace(str, regex2, '');
+      str := TRegEx.Replace(str, regex3, ' ');
+      hsites[I - 1] := str;
+      Continue;
+    end;
+    hsites[I - 1] := str;
   end;
   CloseFile(edit);
   AssignFile(edit, host);
   Rewrite(edit);
   for I := Low(hsites) to High(hsites) do
     if CheckStr(hsites[I], sites) then
-      Writeln(edit, hsites[I]);
+      Writeln(edit, osites[I]);
   CloseFile(edit);
 end;
 
@@ -152,7 +216,7 @@ begin
   begin
     Inc(I, 1);
     SetLength(hsites, I);
-    readln(edit, hsites[I - 1]);
+    Readln(edit, hsites[I - 1]);
   end;
 
   CloseFile(edit);
@@ -217,7 +281,7 @@ begin
     begin
       Inc(I, 1);
       SetLength(sites, I);
-      readln(edit, sites[I - 1]);
+      Readln(edit, sites[I - 1]);
     end;
     CloseFile(edit);
 
@@ -241,66 +305,71 @@ end;
 
 begin
   try
-    SetConsoleTitle('hostsedit 1.2');
     host := GetEnvironmentVariable('WINDIR') + '\System32\drivers\etc\hosts';
+    if ParamCount<>0 then
+    begin
     if ParamStr(1) = '/a' then
     begin
-      ShowWindow(GetConsoleWindow, SW_HIDE);
+      Writeln('Adding entry to HOSTS file...');
       attrib := FileGetAttr(host);
       FileSetAttr(host, faArchive);
       Add(ParamStr(2) + ' ' + ParamStr(3));
       FileSetAttr(host, attrib);
-      Exit;
+      Writeln('Done.');
     end;
     if ParamStr(1) = '/r' then
     begin
+      Writeln('Removing entry from HOSTS file...');
       attrib := FileGetAttr(host);
       FileSetAttr(host, faArchive);
-      ShowWindow(GetConsoleWindow, SW_HIDE);
       Remove(ParamStr(2) + ' ' + ParamStr(3));
       FileSetAttr(host, attrib);
-      Exit;
+      Writeln('Done.');
     end;
     if ParamStr(1) = '/am' then
     begin
+      Writeln('Adding entries to HOSTS file...');
       attrib := FileGetAttr(host);
       FileSetAttr(host, faArchive);
-      ShowWindow(GetConsoleWindow, SW_HIDE);
       AddFromText(ParamStr(2));
       FileSetAttr(host, attrib);
-      Exit;
+      Writeln('Done.');
     end;
     if ParamStr(1) = '/rm' then
     begin
+      Writeln('Adding entries to HOSTS file...');
       attrib := FileGetAttr(host);
       FileSetAttr(host, faArchive);
-      ShowWindow(GetConsoleWindow, SW_HIDE);
       RemoveFromText(ParamStr(2));
       FileSetAttr(host, attrib);
-      Exit;
+      Writeln('Done.');
     end;
     if ParamStr(1) = '/b' then
     begin
-      ShowWindow(GetConsoleWindow, SW_HIDE);
+      Writeln('Creating HOSTS file backup...');
       Backup(ParamStr(2));
-      Exit;
+      Writeln('Done.');
     end;
     if ParamStr(1) = '/res' then
     begin
+      Writeln('Restoring HOSTS file...');
       FileSetAttr(host, faArchive);
-      ShowWindow(GetConsoleWindow, SW_HIDE);
       if ParamCount > 1 then
         Restore(ParamStr(2))
       else
         Restore;
-      Exit;
+      Writeln('Done.');
     end;
     if ParamStr(1) = '/attr' then
     begin
+      Writeln('Changing Attributes for HOSTS file...');
       SetAttrib(ParamStr(2));
-      Exit;
+      Writeln('Done.');
     end;
-
+    end
+    else
+    begin
+    SetConsoleTitle('hostsedit 1.3');
     Writeln('Command line utility for editing HOSTS file.');
     Writeln('Freeware');
     Writeln('');
@@ -327,7 +396,8 @@ begin
     Writeln('');
     Writeln('');
     Writeln('Press any key to continue . . .');
-    readln;
+    Readln;
+    end;
   except
     on E: Exception do
       Writeln(E.ClassName, ': ', E.Message);
