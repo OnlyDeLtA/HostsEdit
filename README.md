@@ -66,6 +66,6 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: ru
 
 
 
-**Download[v1.3] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4098282/hostsedit.zip">Click Here.</a>
+**Download[v1.3] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4113616/hostsedit.zip">Click Here.</a>
 
 *For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*
