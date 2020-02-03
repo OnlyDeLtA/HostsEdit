@@ -337,7 +337,7 @@ begin
     end;
     if ParamStr(1) = '/rm' then
     begin
-      Writeln('Adding entries to HOSTS file...');
+      Writeln('Removing entries from HOSTS file...');
       attrib := FileGetAttr(host);
       FileSetAttr(host, faArchive);
       RemoveFromText(ParamStr(2));
