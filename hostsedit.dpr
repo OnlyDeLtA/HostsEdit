@@ -20,29 +20,50 @@ var
   I: Integer;
 begin
   for I := Low(sites) to High(sites) do
-    if ContainsText(sites[I],str) then
+    if CompareText(sites[I], str) = 0 then
       Exit(False);
   Exit(True);
+end;
+
+function NewLines: Integer;
+var
+  txt: TextFile;
+  chr: Char;
+  n: Integer;
+begin
+  n := 0;
+  AssignFile(txt, host);
+  Reset(txt);
+  while not Eof(txt) do
+  begin
+    read(txt, chr);
+    if chr = #13 then
+      inc(n, 1);
+  end;
+  CloseFile(txt);
+  Result := n;
 end;
 
 procedure Add(site: String);
 var
   edit: TextFile;
   hsites: array of string;
-  I: Integer;
+  I, L, n: Integer;
   str: string;
 begin
   RegularExpression.Create(regex1);
   I := 0;
+  L := 0;
   AssignFile(edit, host);
   Reset(edit);
   while not Eof(edit) do
   begin
+    inc(L, 1);
     Readln(edit, str);
     Match := RegularExpression.Match(str);
     if Match.Success then
     begin
-      Inc(I, 1);
+      inc(I, 1);
       str := Match.Value;
       SetLength(hsites, I);
       str := TRegEx.Replace(str, regex2, '');
@@ -51,8 +72,11 @@ begin
     end;
   end;
   CloseFile(edit);
+  n := NewLines;
   AssignFile(edit, host);
   Append(edit);
+  if n <> L then
+    Writeln(edit);
   if CheckStr(site, hsites) then
     Writeln(edit, site);
   CloseFile(edit);
@@ -73,7 +97,7 @@ begin
   begin
     Readln(edit, str);
     Match := RegularExpression.Match(str);
-    Inc(I, 1);
+    inc(I, 1);
     SetLength(hsites, I);
     SetLength(osites, I);
     osites[I - 1] := str;
@@ -91,7 +115,7 @@ begin
   AssignFile(edit, host);
   Rewrite(edit);
   for I := Low(hsites) to High(hsites) do
-    if not ContainsText(hsites[I],site) then
+    if CompareText(hsites[I], site) <> 0 then
       Writeln(edit, osites[I]);
   CloseFile(edit);
 end;
@@ -101,10 +125,11 @@ var
   txtfile, edit: TextFile;
   sites, hsites: array of string;
   str: string;
-  I: Integer;
+  I, L, n: Integer;
 begin
   RegularExpression.Create(regex1);
   I := 0;
+  L := 0;
   AssignFile(txtfile, lhost);
   Reset(txtfile);
   while not Eof(txtfile) do
@@ -113,7 +138,7 @@ begin
     Match := RegularExpression.Match(str);
     if Match.Success then
     begin
-      Inc(I, 1);
+      inc(I, 1);
       SetLength(sites, I);
       str := Match.Value;
       str := TRegEx.Replace(str, regex2, '');
@@ -127,11 +152,12 @@ begin
   Reset(edit);
   while not Eof(edit) do
   begin
+    inc(L, 1);
     Readln(edit, str);
     Match := RegularExpression.Match(str);
     if Match.Success then
     begin
-      Inc(I, 1);
+      inc(I, 1);
       SetLength(hsites, I);
       str := Match.Value;
       str := TRegEx.Replace(str, regex2, '');
@@ -140,8 +166,11 @@ begin
     end;
   end;
   CloseFile(edit);
+  n := NewLines;
   AssignFile(edit, host);
   Append(edit);
+  if n <> L then
+    Writeln(edit);
   for I := Low(sites) to High(sites) do
     if CheckStr(sites[I], hsites) then
       Writeln(edit, sites[I]);
@@ -165,7 +194,7 @@ begin
     Match := RegularExpression.Match(str);
     if Match.Success then
     begin
-      Inc(I, 1);
+      inc(I, 1);
       SetLength(sites, I);
       str := Match.Value;
       str := TRegEx.Replace(str, regex2, '');
@@ -180,7 +209,7 @@ begin
   begin
     Readln(edit, str);
     Match := RegularExpression.Match(str);
-    Inc(I, 1);
+    inc(I, 1);
     SetLength(hsites, I);
     SetLength(osites, I);
     osites[I - 1] := str;
@@ -214,14 +243,14 @@ begin
   Reset(edit);
   while not Eof(edit) do
   begin
-    Inc(I, 1);
+    inc(I, 1);
     SetLength(hsites, I);
     Readln(edit, hsites[I - 1]);
   end;
 
   CloseFile(edit);
   if not DirectoryExists(ExtractFileDir(loc)) then
-    CreateDir(ExtractFileDir(loc));
+    ForceDirectories(ExtractFileDir(loc));
 
   AssignFile(edit, loc);
   Rewrite(edit);
@@ -279,7 +308,7 @@ begin
     Reset(edit);
     while not Eof(edit) do
     begin
-      Inc(I, 1);
+      inc(I, 1);
       SetLength(sites, I);
       Readln(edit, sites[I - 1]);
     end;
@@ -306,97 +335,97 @@ end;
 begin
   try
     host := GetEnvironmentVariable('WINDIR') + '\System32\drivers\etc\hosts';
-    if ParamCount<>0 then
+    if ParamCount <> 0 then
     begin
-    if ParamStr(1) = '/a' then
-    begin
-      Writeln('Adding entry to HOSTS file...');
-      attrib := FileGetAttr(host);
-      FileSetAttr(host, faArchive);
-      Add(ParamStr(2) + ' ' + ParamStr(3));
-      FileSetAttr(host, attrib);
-      Writeln('Done.');
-    end;
-    if ParamStr(1) = '/r' then
-    begin
-      Writeln('Removing entry from HOSTS file...');
-      attrib := FileGetAttr(host);
-      FileSetAttr(host, faArchive);
-      Remove(ParamStr(2) + ' ' + ParamStr(3));
-      FileSetAttr(host, attrib);
-      Writeln('Done.');
-    end;
-    if ParamStr(1) = '/am' then
-    begin
-      Writeln('Adding entries to HOSTS file...');
-      attrib := FileGetAttr(host);
-      FileSetAttr(host, faArchive);
-      AddFromText(ParamStr(2));
-      FileSetAttr(host, attrib);
-      Writeln('Done.');
-    end;
-    if ParamStr(1) = '/rm' then
-    begin
-      Writeln('Removing entries from HOSTS file...');
-      attrib := FileGetAttr(host);
-      FileSetAttr(host, faArchive);
-      RemoveFromText(ParamStr(2));
-      FileSetAttr(host, attrib);
-      Writeln('Done.');
-    end;
-    if ParamStr(1) = '/b' then
-    begin
-      Writeln('Creating HOSTS file backup...');
-      Backup(ParamStr(2));
-      Writeln('Done.');
-    end;
-    if ParamStr(1) = '/res' then
-    begin
-      Writeln('Restoring HOSTS file...');
-      FileSetAttr(host, faArchive);
-      if ParamCount > 1 then
-        Restore(ParamStr(2))
-      else
-        Restore;
-      Writeln('Done.');
-    end;
-    if ParamStr(1) = '/attr' then
-    begin
-      Writeln('Changing Attributes for HOSTS file...');
-      SetAttrib(ParamStr(2));
-      Writeln('Done.');
-    end;
+      if ParamStr(1) = '/a' then
+      begin
+        Writeln('Adding entry to HOSTS file...');
+        attrib := FileGetAttr(host);
+        FileSetAttr(host, faArchive);
+        Add(ParamStr(2) + ' ' + ParamStr(3));
+        FileSetAttr(host, attrib);
+        Writeln('Done.');
+      end;
+      if ParamStr(1) = '/r' then
+      begin
+        Writeln('Removing entry from HOSTS file...');
+        attrib := FileGetAttr(host);
+        FileSetAttr(host, faArchive);
+        Remove(ParamStr(2) + ' ' + ParamStr(3));
+        FileSetAttr(host, attrib);
+        Writeln('Done.');
+      end;
+      if ParamStr(1) = '/am' then
+      begin
+        Writeln('Adding entries to HOSTS file...');
+        attrib := FileGetAttr(host);
+        FileSetAttr(host, faArchive);
+        AddFromText(ParamStr(2));
+        FileSetAttr(host, attrib);
+        Writeln('Done.');
+      end;
+      if ParamStr(1) = '/rm' then
+      begin
+        Writeln('Removing entries from HOSTS file...');
+        attrib := FileGetAttr(host);
+        FileSetAttr(host, faArchive);
+        RemoveFromText(ParamStr(2));
+        FileSetAttr(host, attrib);
+        Writeln('Done.');
+      end;
+      if ParamStr(1) = '/b' then
+      begin
+        Writeln('Creating HOSTS file backup...');
+        Backup(ParamStr(2));
+        Writeln('Done.');
+      end;
+      if ParamStr(1) = '/res' then
+      begin
+        Writeln('Restoring HOSTS file...');
+        FileSetAttr(host, faArchive);
+        if ParamCount > 1 then
+          Restore(ParamStr(2))
+        else
+          Restore;
+        Writeln('Done.');
+      end;
+      if ParamStr(1) = '/attr' then
+      begin
+        Writeln('Changing Attributes for HOSTS file...');
+        SetAttrib(ParamStr(2));
+        Writeln('Done.');
+      end;
     end
     else
     begin
-    SetConsoleTitle('hostsedit 1.3');
-    Writeln('Command line utility for editing HOSTS file.');
-    Writeln('Freeware');
-    Writeln('');
-    Writeln('Usage :');
-    Writeln('');
-    Writeln('  /a     : Add single entry.');
-    Writeln('  /r     : Remove single entry.');
-    Writeln('  /am    : Add multiple entries, reading from text file.');
-    Writeln('  /rm    : Remove multiple entries, reading from text file.');
-    Writeln('  /b     : Create backup of HOSTS file.');
-    Writeln('  /res   : Restore HOSTS file to Windows default, or to a previous backup.');
-    Writeln('  /attr  : Set attributes for HOSTS file, ReadOnly(/attr r), Archive(/attr a), Both(/attr ra).');
-    Writeln('');
-    Writeln('Samples :');
-    Writeln('');
-    Writeln('  hostsedit /a 0.0.0.0 www.example-domain.com');
-    Writeln('  hostsedit /r 0.0.0.0 www.example-domain.com ');
-    Writeln('  hostsedit /am "D:\HOSTS Entries\example.txt"');
-    Writeln('  hostsedit /rm "D:\HOSTS Entries\example.txt"');
-    Writeln('  hostsedit /b "D:\HOSTS.BKP"');
-    Writeln('  hostsedit /res');
-    Writeln('  hostsedit /res "D:\HOSTS.BKP"');
-    Writeln('  hostsedit /attr r');
-    Writeln('');
-    Writeln('');
-    Writeln('Press any key to continue . . .');
-    Readln;
+      SetConsoleTitle('hostsedit 1.4');
+      Writeln('Command line utility for editing Windows HOSTS file.');
+      Writeln('Freeware');
+      Writeln('');
+      Writeln('Usage :');
+      Writeln('');
+      Writeln('  /a     : Add single entry.');
+      Writeln('  /r     : Remove single entry.');
+      Writeln('  /am    : Add multiple entries, reading from text file.');
+      Writeln('  /rm    : Remove multiple entries, reading from text file.');
+      Writeln('  /b     : Create backup of HOSTS file.');
+      Writeln('  /res   : Restore HOSTS file to Windows default, or to a previous backup.');
+      Writeln('  /attr  : Set attributes for HOSTS file, ReadOnly(/attr r), Archive(/attr a), Both(/attr ra).');
+      Writeln('');
+      Writeln('Samples :');
+      Writeln('');
+      Writeln('  hostsedit /a 0.0.0.0 www.example-domain.com');
+      Writeln('  hostsedit /r 0.0.0.0 www.example-domain.com ');
+      Writeln('  hostsedit /am "D:\HOSTS Entries\example.txt"');
+      Writeln('  hostsedit /rm "D:\HOSTS Entries\example.txt"');
+      Writeln('  hostsedit /b "D:\HOSTS.BKP"');
+      Writeln('  hostsedit /res');
+      Writeln('  hostsedit /res "D:\HOSTS.BKP"');
+      Writeln('  hostsedit /attr r');
+      Writeln('');
+      Writeln('');
+      Writeln('Press any key to continue . . .');
+      Readln;
     end;
   except
     on E: Exception do
