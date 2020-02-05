@@ -1,6 +1,7 @@
 
 
 
+
 # HostsEdit
 
 <img align="center" src="https://i.imgur.com/yW6WR9S.png">
@@ -62,11 +63,13 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: ru
 Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
 
-<img align="center" src="https://i.postimg.cc/1zH6jt1d/sshot-8.png">
+<img align="center" src="https://i.imgur.com/2ILGhIH.png">
 
 
 
 
-**Download[v1.3.1] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4148681/hostsedit.zip">Click Here.</a>
+**Download[v1.4] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4159679/hostsedit.zip">Click Here.</a>
 
 *For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*
+
+*For editing multiple entries instead of using /a, /r multiple times, prefer using /am, /rm. for better speed.*
