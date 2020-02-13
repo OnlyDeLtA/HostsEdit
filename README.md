@@ -2,6 +2,7 @@
 
 
 
+
 # HostsEdit
 
 <img align="center" src="https://i.imgur.com/yW6WR9S.png">
@@ -29,7 +30,7 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
 **Samples:**
 ```
   hostsedit /a 0.0.0.0 www.example-domain.com
-  hostsedit /r 0.0.0.0 www.example-domain.com
+  hostsedit /r www.example-domain.com
   hostsedit /am "D:\HOSTS Entries\example.txt"
   hostsedit /rm "D:\HOSTS Entries\example.txt"
   hostsedit /b "D:\HOSTS.BKP"
@@ -39,12 +40,14 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
 ```
 **Sample Text file for editing(adding/removing) multiple entries:**
 ```
+#entries suitable for both adding/removing.
 0.0.0.0 c3.zedo.com
 0.0.0.0 c4.zedo.com
 0.0.0.0 c5.zedo.com
 0.0.0.0 c6.zedo.com
-0.0.0.0 c7.zedo.com
-0.0.0.0 c8.zedo.com
+#entries suitable for removing alone.
+c7.zedo.com
+c8.zedo.com
 ```
 **Using HostsEdit with Inno Setup:**
 ```
@@ -53,7 +56,7 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
 [Run]
 Filename: "{app}\hostsedit.exe"; Parameters: "/a 0.0.0.0 www.google.com"; Flags: runhidden;
 [UninstallRun]
-Filename: "{app}\hostsedit.exe"; Parameters: "/r 0.0.0.0 www.google.com"; Flags: runhidden;
+Filename: "{app}\hostsedit.exe"; Parameters: "/r www.google.com"; Flags: runhidden;
 
 //Edit Multiple Entries:
 
@@ -63,12 +66,12 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: ru
 Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
 
-<img align="center" src="https://i.imgur.com/2ILGhIH.png">
+<img align="center" src="https://i.postimg.cc/rmD4HMNN/sshot-31.png">
 
 
 
 
-**Download[v1.4] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4159679/hostsedit.zip">Click Here.</a>
+**Download[v1.5] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4196627/hostsedit.zip">Click Here.</a>
 
 *For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*
 
