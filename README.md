@@ -3,42 +3,47 @@
 
 
 
+
 # HostsEdit
 
 <img align="center" src="https://i.imgur.com/yW6WR9S.png">
 
-HostsEdit is a command-line utility for editing Windows HOSTS file. it can be used to edit(add/remove) single or multiple entries in hosts file. it also has some additional features as creating hosts file backup, restoring hosts file to Windows default or to a previous backup and changing attributes of hosts file. HostsEdit is written in Delphi, Compiled using Embarcadero's Delphi 10.3.3.
+HostsEdit is a command-line utility for editing Windows HOSTS file. it can be used to edit(add/remove) single or multiple entries in hosts file. it also has some additional features as creating hosts file backup, restoring hosts file to Windows default or to a previous backup, changing attributes of hosts file and flushing Windows DNS cache. HostsEdit is written in Delphi, Compiled using Embarcadero's Delphi 10.3.3.
 
-**Features:**
+## Features
 
  - Add/Remove single entry in HOSTS file.
  - Add/Remove multiple entries in HOSTS file, reading from text file.
- - Create backup of HOSTS file.
+ - Create a backup of HOSTS file.
  - Restore HOSTS file to windows default, or to a previous backup.
  - Change attributes of HOSTS file.
+ - Supports both IPv4 & IPv6 Entries.
+ - Flush Windows DNS cache.
 
-**Usage:**
+## Usage
 ```
   /a     : Add single entry.
   /r     : Remove single entry.
   /am    : Add multiple entries, reading from text file.
   /rm    : Remove multiple entries, reading from text file.
   /b     : Create backup of HOSTS file.
+  /fdns  : Flush Windows DNS Cache.
   /res   : Restore HOSTS file to Windows default, or to a previous backup.
   /attr  : Set attributes for HOSTS file, ReadOnly(/attr r), Archive(/attr a), Both(/attr ra).
 ```
-**Samples:**
+## Samples
 ```
   hostsedit /a 0.0.0.0 www.example-domain.com
   hostsedit /r www.example-domain.com
   hostsedit /am "D:\HOSTS Entries\example.txt"
   hostsedit /rm "D:\HOSTS Entries\example.txt"
   hostsedit /b "D:\HOSTS.BKP"
+  hostsedit /fdns
   hostsedit /res
   hostsedit /res "D:\HOSTS.BKP"
   hostsedit /attr r
 ```
-**Sample Text file for editing(adding/removing) multiple entries:**
+### Sample Text file for editing(adding/removing) multiple entries
 ```
 #entries suitable for both adding/removing.
 0.0.0.0 c3.zedo.com
@@ -49,7 +54,7 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
 c7.zedo.com
 c8.zedo.com
 ```
-**Using HostsEdit with Inno Setup:**
+### Using HostsEdit with Inno Setup
 ```
 //Edit Single Entry:
 
@@ -66,13 +71,11 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: ru
 Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
 
-<img align="center" src="https://i.postimg.cc/rmD4HMNN/sshot-31.png">
+<img align="center" src="https://i.postimg.cc/43nXcrF7/sshot-36.png">
 
 
-
-
-**Download[v1.5] :**  <a href="https://github.com/OnlyDeLtA/HostsEdit/files/4196627/hostsedit.zip">Click Here.</a>
-
-*For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*
-
-*For editing multiple entries instead of using /a, /r multiple times, prefer using /am, /rm. for better speed.*
+## Download 
+ * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/1.6)
+ * [Download Older Versions](https://github.com/OnlyDeLtA/HostsEdit/releases)
+ 
+  *For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*

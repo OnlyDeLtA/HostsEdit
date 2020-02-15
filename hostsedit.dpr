@@ -12,9 +12,16 @@ var
   attrib: Integer;
   RegularExpression: TRegEx;
   Match: TMatch;
-  regex1: string = '^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+[^#\s]*';
+  regex1: string =
+    '(^\h*(\w{0,4}:\w{0,4})+\s+[^#\s]*)|(^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+[^#\s]*)';
   regex2: string = '^\h+';
   regex3: string = '(?<=.) +(?<=.)';
+
+procedure FlushDNS();
+begin
+  WinExec('ipconfig /flushdns', SW_HIDE);
+  Sleep(500);
+end;
 
 function CheckStr(str: string; sites: array of string): Boolean;
 var
@@ -45,6 +52,68 @@ begin
   Result := n;
 end;
 
+procedure Restore(loc: String = '');
+var
+  rstrm: TStreamReader;
+  wstrm: TStreamWriter;
+  sites: array of string;
+  I: Integer;
+begin
+  if loc = '' then
+  begin
+    wstrm := TStreamWriter.Create(host);
+    wstrm.writeline('# Copyright (c) 1993-2009 Microsoft Corp.');
+    wstrm.writeline('#');
+    wstrm.writeline
+      ('# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.');
+    wstrm.writeline('#');
+    wstrm.writeline
+      ('# This file contains the mappings of IP addresses to host names. Each');
+    wstrm.writeline
+      ('# entry should be kept on an individual line. The IP address should');
+    wstrm.writeline
+      ('# be placed in the first column followed by the corresponding host name.');
+    wstrm.writeline
+      ('# The IP address and the host name should be separated by at least one');
+    wstrm.writeline('# space.');
+    wstrm.writeline('#');
+    wstrm.writeline
+      ('# Additionally, comments (such as these) may be inserted on individual');
+    wstrm.writeline
+      ('# lines or following the machine name denoted by a ''#'' symbol.');
+    wstrm.writeline('#');
+    wstrm.writeline('# For example:');
+    wstrm.writeline('#');
+    wstrm.writeline
+      ('#      102.54.94.97     rhino.acme.com          # source server');
+    wstrm.writeline
+      ('#       38.25.63.10     x.acme.com              # x client host');
+    wstrm.writeline('');
+    wstrm.writeline
+      ('# localhost name resolution is handled within DNS itself.');
+    wstrm.writeline('#	127.0.0.1       localhost');
+    wstrm.writeline('#	::1             localhost');
+    wstrm.free;
+  end
+  else
+  begin
+    I := 0;
+    rstrm := TStreamReader.Create(loc);
+    while not(rstrm.endofstream) do
+    begin
+      inc(I, 1);
+      SetLength(sites, I);
+      sites[I - 1] := rstrm.ReadLine;
+    end;
+    rstrm.free;
+
+    wstrm := TStreamWriter.Create(host);
+    for I := Low(sites) to High(sites) do
+      wstrm.writeline(sites[I]);
+    wstrm.free;
+  end;
+end;
+
 procedure Add(ip: String; domain: String);
 var
   rstrm: TStreamReader;
@@ -55,6 +124,8 @@ var
   str: string;
   exists: Boolean;
 begin
+  if not FileExists(host) then
+    Restore;
   exists := False;
   RegularExpression.Create(regex1);
   I := 0;
@@ -133,7 +204,8 @@ begin
     begin
       str := Match.Value;
       str := TRegEx.Replace(str,
-        '^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+', '');
+        '(^\h*(\w{0,4}:\w{0,4})+\s+)|(^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
+        '');
       hsites[I - 1] := str;
       Continue;
     end;
@@ -157,6 +229,8 @@ var
   I, L, J, K, n: Integer;
   exists: Boolean;
 begin
+  if not FileExists(host) then
+    Restore;
   RegularExpression.Create(regex1);
   I := 0;
   L := 0;
@@ -272,7 +346,8 @@ begin
       SetLength(sites, I);
       str := Match.Value;
       str := TRegEx.Replace(str,
-        '^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+', '');
+        '(^\h*(\w{0,4}:\w{0,4})+\s+)|(^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
+        '');
       sites[I - 1] := str;
     end
     else if AltMatch.Success then
@@ -299,7 +374,8 @@ begin
     begin
       str := Match.Value;
       str := TRegEx.Replace(str,
-        '^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+', '');
+        '(^\h*(\w{0,4}:\w{0,4})+\s+)|(^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
+        '');
       hsites[I - 1] := str;
       Continue;
     end;
@@ -340,68 +416,6 @@ begin
   wstrm.free;
 end;
 
-procedure Restore(loc: String = '');
-var
-  rstrm: TStreamReader;
-  wstrm: TStreamWriter;
-  sites: array of string;
-  I: Integer;
-begin
-  if loc = '' then
-  begin
-    wstrm := TStreamWriter.Create(host);
-    wstrm.writeline('# Copyright (c) 1993-2009 Microsoft Corp.');
-    wstrm.writeline('#');
-    wstrm.writeline
-      ('# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.');
-    wstrm.writeline('#');
-    wstrm.writeline
-      ('# This file contains the mappings of IP addresses to host names. Each');
-    wstrm.writeline
-      ('# entry should be kept on an individual line. The IP address should');
-    wstrm.writeline
-      ('# be placed in the first column followed by the corresponding host name.');
-    wstrm.writeline
-      ('# The IP address and the host name should be separated by at least one');
-    wstrm.writeline('# space.');
-    wstrm.writeline('#');
-    wstrm.writeline
-      ('# Additionally, comments (such as these) may be inserted on individual');
-    wstrm.writeline
-      ('# lines or following the machine name denoted by a ''#'' symbol.');
-    wstrm.writeline('#');
-    wstrm.writeline('# For example:');
-    wstrm.writeline('#');
-    wstrm.writeline
-      ('#      102.54.94.97     rhino.acme.com          # source server');
-    wstrm.writeline
-      ('#       38.25.63.10     x.acme.com              # x client host');
-    wstrm.writeline('');
-    wstrm.writeline
-      ('# localhost name resolution is handled within DNS itself.');
-    wstrm.writeline('#	127.0.0.1       localhost');
-    wstrm.writeline('#	::1             localhost');
-    wstrm.free;
-  end
-  else
-  begin
-    I := 0;
-    rstrm := TStreamReader.Create(loc);
-    while not(rstrm.endofstream) do
-    begin
-      inc(I, 1);
-      SetLength(sites, I);
-      sites[I - 1] := rstrm.ReadLine;
-    end;
-    rstrm.free;
-
-    wstrm := TStreamWriter.Create(host);
-    for I := Low(sites) to High(sites) do
-      wstrm.writeline(sites[I]);
-    wstrm.free;
-  end;
-end;
-
 procedure SetAttrib(attrib: String);
 begin
   if attrib = 'r' then
@@ -417,13 +431,16 @@ begin
     host := GetEnvironmentVariable('WINDIR') + '\System32\drivers\etc\hosts';
     if ParamCount <> 0 then
     begin
-      if (ParamStr(1) = '/a') and (ParamCount = 3) then
+      if (ParamStr(1) = '/a') and (ParamCount = 3) and
+        RegularExpression.IsMatch(ParamStr(2),
+        '(^(\w{0,4}:\w{0,4})+$)|(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)') then
       begin
         Writeln('Adding entry to HOSTS file...');
         attrib := FileGetAttr(host);
         FileSetAttr(host, faArchive);
         Add(ParamStr(2), ParamStr(3));
-        FileSetAttr(host, attrib);
+        if attrib <> -1 then
+          FileSetAttr(host, attrib);
         Writeln('Done.');
       end;
       if (ParamStr(1) = '/r') and (ParamCount = 2) then
@@ -441,7 +458,8 @@ begin
         attrib := FileGetAttr(host);
         FileSetAttr(host, faArchive);
         AddFromText(ParamStr(2));
-        FileSetAttr(host, attrib);
+        if attrib <> -1 then
+          FileSetAttr(host, attrib);
         Writeln('Done.');
       end;
       if (ParamStr(1) = '/rm') and (ParamCount = 2) then
@@ -459,8 +477,7 @@ begin
         Backup(ParamStr(2));
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/res') and (ParamCount = 2) and FileExists(ParamStr(2))
-      then
+      if (ParamStr(1) = '/res') and (ParamCount = 2) then
       begin
         Writeln('Restoring HOSTS file...');
         FileSetAttr(host, faArchive);
@@ -480,12 +497,15 @@ begin
         SetAttrib(ParamStr(2));
         Writeln('Done.');
       end;
+      if (ParamStr(1) = '/fdns') and (ParamCount = 1) then
+      begin
+        FlushDNS;
+      end;
     end
     else
     begin
-      SetConsoleTitle('hostsedit 1.5');
+      SetConsoleTitle('hostsedit 1.6');
       Writeln('Command line utility for editing Windows HOSTS file.');
-      Writeln('Freeware');
       Writeln('');
       Writeln('Usage :');
       Writeln('');
@@ -494,6 +514,7 @@ begin
       Writeln('  /am    : Add multiple entries, reading from text file.');
       Writeln('  /rm    : Remove multiple entries, reading from text file.');
       Writeln('  /b     : Create backup of HOSTS file.');
+      Writeln('  /fdns  : Flush Windows DNS Cache.');
       Writeln('  /res   : Restore HOSTS file to Windows default, or to a previous backup.');
       Writeln('  /attr  : Set attributes for HOSTS file, ReadOnly(/attr r), Archive(/attr a), Both(/attr ra).');
       Writeln('');
@@ -504,6 +525,7 @@ begin
       Writeln('  hostsedit /am "D:\HOSTS Entries\example.txt"');
       Writeln('  hostsedit /rm "D:\HOSTS Entries\example.txt"');
       Writeln('  hostsedit /b "D:\HOSTS.BKP"');
+      Writeln('  hostsedit /fdns');
       Writeln('  hostsedit /res');
       Writeln('  hostsedit /res "D:\HOSTS.BKP"');
       Writeln('  hostsedit /attr r');
