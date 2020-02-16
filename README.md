@@ -70,9 +70,9 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: ru
 [UninstallRun]
 Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
-
-<img align="center" src="https://i.postimg.cc/XYD2VztK/sshot-42.png">
-
+<p align="center">
+<img src="https://i.postimg.cc/XYD2VztK/sshot-42.png">
+</p>
 
 ## Download 
  * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/1.7)
