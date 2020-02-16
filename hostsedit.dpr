@@ -33,25 +33,6 @@ begin
   Exit(True);
 end;
 
-function NewLines: Integer;
-var
-  txt: TextFile;
-  chr: Char;
-  n: Integer;
-begin
-  n := 0;
-  AssignFile(txt, host);
-  Reset(txt);
-  while not Eof(txt) do
-  begin
-    read(txt, chr);
-    if chr = #13 then
-      inc(n, 1);
-  end;
-  CloseFile(txt);
-  Result := n;
-end;
-
 procedure Restore(loc: String = '');
 var
   rstrm: TStreamReader;
@@ -119,7 +100,7 @@ var
   rstrm: TStreamReader;
   wstrm: TStreamWriter;
   hip, hdomain, osites: array of string;
-  I, L, n: Integer;
+  I: Integer;
   splt: TStringDynArray;
   str: string;
   exists: Boolean;
@@ -129,11 +110,9 @@ begin
   exists := False;
   RegularExpression.Create(regex1);
   I := 0;
-  L := 0;
   rstrm := TStreamReader.Create(host);
   while not(rstrm.endofstream) do
   begin
-    inc(L, 1);
     inc(I, 1);
     SetLength(hip, I);
     SetLength(hdomain, I);
@@ -157,7 +136,6 @@ begin
       end
       else if (CompareText(hdomain[I - 1], domain) = 0) and (exists = True) then
       begin
-        hdomain[I - 1] := 'removed';
         hip[I - 1] := 'removed';
       end;
       Continue;
@@ -166,13 +144,10 @@ begin
     hdomain[I - 1] := '';
   end;
   rstrm.free;
-  n := NewLines;
   wstrm := TStreamWriter.Create(host);
-  if n <> L then
-    wstrm.writeline;
 
-  for I := Low(hdomain) to High(hdomain) do
-    if (hdomain[I] <> 'removed') then
+  for I := Low(hip) to High(hip) do
+    if (hip[I] <> 'removed') then
       wstrm.writeline(osites[I]);
 
   if not exists then
@@ -226,19 +201,17 @@ var
   splt: TStringDynArray;
   ip, domain, hip, hdomain, osites, aip, adomain: array of string;
   str: string;
-  I, L, J, K, n: Integer;
+  I, J, K: Integer;
   exists: Boolean;
 begin
   if not FileExists(host) then
     Restore;
   RegularExpression.Create(regex1);
   I := 0;
-  L := 0;
   K := 0;
   rstrm := TStreamReader.Create(host);
   while not(rstrm.endofstream) do
   begin
-    inc(L, 1);
     inc(I, 1);
     SetLength(hip, I);
     SetLength(hdomain, I);
@@ -293,7 +266,6 @@ begin
       end
       else if (CompareText(hdomain[J], domain[I]) = 0) and (exists = True) then
       begin
-        hdomain[J] := 'removed';
         hip[J] := 'removed';
       end;
 
@@ -309,12 +281,9 @@ begin
     end;
   end;
 
-  n := NewLines;
   wstrm := TStreamWriter.Create(host);
-  if n <> L then
-    wstrm.writeline;
-  for I := Low(hdomain) to High(hdomain) do
-    if (hdomain[I] <> 'removed') then
+  for I := Low(hip) to High(hip) do
+    if (hip[I] <> 'removed') then
       wstrm.writeline(osites[I]);
   for I := Low(adomain) to High(adomain) do
     wstrm.writeline(aip[I] + ' ' + adomain[I]);
@@ -504,7 +473,7 @@ begin
     end
     else
     begin
-      SetConsoleTitle('hostsedit 1.6');
+      SetConsoleTitle('hostsedit 1.7');
       Writeln('Command line utility for editing Windows HOSTS file.');
       Writeln('');
       Writeln('Usage :');
