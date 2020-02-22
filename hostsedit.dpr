@@ -13,9 +13,8 @@ var
   RegularExpression: TRegEx;
   Match: TMatch;
   regex1: string =
-    '(^\h*(\w{0,4}:\w{0,4})+\s+[^#\s]*)|(^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+[^#\s]*)';
-  regex2: string = '^\h+';
-  regex3: string = '(?<=.) +(?<=.)';
+    '(^\s*(\w{0,4}:\w{0,4})+\s+[^#\s]*)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+[^#\s]*)';
+  regex2: string = '(?<=.)\s+(?<=.)';
 
 procedure FlushDNS();
 begin
@@ -123,9 +122,8 @@ begin
     if Match.Success then
     begin
       str := Match.Value;
-      str := TRegEx.Replace(str, regex2, '');
-      str := TRegEx.Replace(str, regex3, ' ');
-      splt := Splitstring(str, ' ');
+      str:=Trim(str);
+      splt := TRegEx.Split(str, regex2);
       hip[I - 1] := splt[0];
       hdomain[I - 1] := splt[1];
       if (CompareText(hdomain[I - 1], domain) = 0) and (exists = False) then
@@ -179,7 +177,7 @@ begin
     begin
       str := Match.Value;
       str := TRegEx.Replace(str,
-        '(^\h*(\w{0,4}:\w{0,4})+\s+)|(^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
+        '(^\s*(\w{0,4}:\w{0,4})+\s+)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
         '');
       hsites[I - 1] := str;
       Continue;
@@ -222,9 +220,8 @@ begin
     if Match.Success then
     begin
       str := Match.Value;
-      str := TRegEx.Replace(str, regex2, '');
-      str := TRegEx.Replace(str, regex3, ' ');
-      splt := Splitstring(str, ' ');
+      str:=Trim(str);
+      splt := TRegEx.Split(str, regex2);
       hip[I - 1] := splt[0];
       hdomain[I - 1] := splt[1];
       Continue;
@@ -245,9 +242,8 @@ begin
       SetLength(ip, I);
       SetLength(domain, I);
       str := Match.Value;
-      str := TRegEx.Replace(str, regex2, '');
-      str := TRegEx.Replace(str, regex3, ' ');
-      splt := Splitstring(str, ' ');
+      str:=Trim(str);
+      splt := TRegEx.Split(str, regex2);
       ip[I - 1] := splt[0];
       domain[I - 1] := splt[1];
     end;
@@ -301,7 +297,7 @@ var
   I: Integer;
 begin
   RegularExpression.Create(regex1);
-  AltRegularExpression.Create('^\h*[^#\s]*');
+  AltRegularExpression.Create('^\s*[^#\s]*');
   I := 0;
   rstrm := TStreamReader.Create(lhost);
   while not(rstrm.endofstream) do
@@ -315,7 +311,7 @@ begin
       SetLength(sites, I);
       str := Match.Value;
       str := TRegEx.Replace(str,
-        '(^\h*(\w{0,4}:\w{0,4})+\s+)|(^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
+        '(^\s*(\w{0,4}:\w{0,4})+\s+)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
         '');
       sites[I - 1] := str;
     end
@@ -324,7 +320,7 @@ begin
       inc(I, 1);
       SetLength(sites, I);
       str := AltMatch.Value;
-      str := TRegEx.Replace(str, '^\h*', '');
+      str := Trim(str);
       sites[I - 1] := str;
     end;
   end;
@@ -343,7 +339,7 @@ begin
     begin
       str := Match.Value;
       str := TRegEx.Replace(str,
-        '(^\h*(\w{0,4}:\w{0,4})+\s+)|(^\h*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
+        '(^\s*(\w{0,4}:\w{0,4})+\s+)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
         '');
       hsites[I - 1] := str;
       Continue;
@@ -473,7 +469,7 @@ begin
     end
     else
     begin
-      SetConsoleTitle('hostsedit 1.7');
+      SetConsoleTitle('hostsedit 1.8');
       Writeln('Command line utility for editing Windows HOSTS file.');
       Writeln('');
       Writeln('Usage :');

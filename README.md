@@ -1,9 +1,3 @@
-
-
-
-
-
-
 # HostsEdit
 
 <img align="center" src="https://i.imgur.com/yW6WR9S.png">
@@ -71,11 +65,11 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: ru
 Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
 <p align="center">
-<img src="https://i.postimg.cc/XYD2VztK/sshot-42.png">
+<img src="https://i.postimg.cc/3RFFXkfr/sshot-44.png">
 </p>
 
 ## Download 
- * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/1.7)
+ * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/1.8)
  * [Download Older Versions](https://github.com/OnlyDeLtA/HostsEdit/releases)
  
   *For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*
