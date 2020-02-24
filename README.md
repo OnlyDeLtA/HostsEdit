@@ -1,3 +1,4 @@
+
 # HostsEdit
 
 <img align="center" src="https://i.imgur.com/yW6WR9S.png">
@@ -13,6 +14,7 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
  - Change attributes of HOSTS file.
  - Supports both IPv4 & IPv6 Entries.
  - Flush Windows DNS cache.
+ - Supports third party HOSTS files like [MVPS](http://winhelp2002.mvps.org/hosts.htm).
 
 ## Usage
 ```
@@ -65,11 +67,11 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: ru
 Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
 <p align="center">
-<img src="https://i.postimg.cc/3RFFXkfr/sshot-44.png">
+<img src="https://i.postimg.cc/RVSGf2LF/sshot-51.png">
 </p>
 
 ## Download 
- * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/1.8)
+ * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/1.9)
  * [Download Older Versions](https://github.com/OnlyDeLtA/HostsEdit/releases)
  
   *For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*

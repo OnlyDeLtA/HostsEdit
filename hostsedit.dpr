@@ -5,7 +5,7 @@ program hostsedit;
 
 uses
   System.SysUtils, Winapi.Windows, System.Types, System.Classes,
-  System.StrUtils, System.RegularExpressions;
+  System.RegularExpressions;
 
 var
   host: string;
@@ -122,7 +122,7 @@ begin
     if Match.Success then
     begin
       str := Match.Value;
-      str:=Trim(str);
+      str := Trim(str);
       splt := TRegEx.Split(str, regex2);
       hip[I - 1] := splt[0];
       hdomain[I - 1] := splt[1];
@@ -220,7 +220,7 @@ begin
     if Match.Success then
     begin
       str := Match.Value;
-      str:=Trim(str);
+      str := Trim(str);
       splt := TRegEx.Split(str, regex2);
       hip[I - 1] := splt[0];
       hdomain[I - 1] := splt[1];
@@ -242,7 +242,7 @@ begin
       SetLength(ip, I);
       SetLength(domain, I);
       str := Match.Value;
-      str:=Trim(str);
+      str := Trim(str);
       splt := TRegEx.Split(str, regex2);
       ip[I - 1] := splt[0];
       domain[I - 1] := splt[1];
@@ -469,7 +469,7 @@ begin
     end
     else
     begin
-      SetConsoleTitle('hostsedit 1.8');
+      SetConsoleTitle('hostsedit 1.9');
       Writeln('Command line utility for editing Windows HOSTS file.');
       Writeln('');
       Writeln('Usage :');
