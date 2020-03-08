@@ -1,4 +1,4 @@
-
+  
 # HostsEdit
 
 <img align="center" src="https://i.imgur.com/yW6WR9S.png">
@@ -12,6 +12,7 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
  - Create a backup of HOSTS file.
  - Restore HOSTS file to windows default, or to a previous backup.
  - Change attributes of HOSTS file.
+ - Replace IPs in HOSTS file.
  - Supports both IPv4 & IPv6 Entries.
  - Flush Windows DNS cache.
  - Supports third party HOSTS files like [MVPS](http://winhelp2002.mvps.org/hosts.htm).
@@ -50,6 +51,25 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
 c7.zedo.com
 c8.zedo.com
 ```
+### Using HostsEdit with Command Prompt
+```
+Run CMD as Administrator(Important to receive execution results from hostsedit back to CMD),
+using 'cd' command change working directory to where hostsedit.exe is placed,
+now write commands as Shown in the Samples.
+```
+```
+Microsoft Windows [Version 10.0.14393]
+(c) 2016 Microsoft Corporation. All rights reserved.
+
+C:\Windows\system32>hostsedit /a 0.0.0.0 www.example-domain.com
+Adding entry to HOSTS file...
+Done.
+
+C:\Windows\system32>hostsedit /r www.example-domain.com
+Removing entry from HOSTS file...
+Done.
+
+```
 ### Using HostsEdit with Inno Setup
 ```
 //Edit Single Entry:
@@ -67,11 +87,11 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: ru
 Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
 <p align="center">
-<img src="https://i.postimg.cc/RVSGf2LF/sshot-51.png">
+<img src="https://i.postimg.cc/Gm59bGxX/sshot-60.png">
 </p>
 
 ## Download 
- * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/1.9)
+ * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/2.0)
  * [Download Older Versions](https://github.com/OnlyDeLtA/HostsEdit/releases)
  
   *For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*

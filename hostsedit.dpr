@@ -13,7 +13,7 @@ var
   RegularExpression: TRegEx;
   Match: TMatch;
   regex1: string =
-    '(^\s*(\w{0,4}:\w{0,4})+\s+[^#\s]*)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+[^#\s]*)';
+    '(^\s*(\w{0,4}:\w{0,4})+\s+[^#\s]+)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+[^#\s]+)';
   regex2: string = '(?<=.)\s+(?<=.)';
 
 procedure FlushDNS();
@@ -297,7 +297,7 @@ var
   I: Integer;
 begin
   RegularExpression.Create(regex1);
-  AltRegularExpression.Create('^\s*[^#\s]*');
+  AltRegularExpression.Create('^\s*[^#\s]+');
   I := 0;
   rstrm := TStreamReader.Create(lhost);
   while not(rstrm.endofstream) do
@@ -391,6 +391,49 @@ begin
     FileSetAttr(host, faArchive);
 end;
 
+procedure ReplaceIP(ip1: string; ip2:string);
+var
+  rstrm: TStreamReader;
+  wstrm: TStreamWriter;
+  splt: TStringDynArray;
+  hip, hdomain, osites: array of string;
+  str: string;
+  I: Integer;
+begin
+  RegularExpression.Create(regex1);
+  I := 0;
+  rstrm := TStreamReader.Create(host);
+  while not(rstrm.endofstream) do
+  begin
+    inc(I, 1);
+    SetLength(hip, I);
+    SetLength(hdomain, I);
+    SetLength(osites, I);
+    str := rstrm.ReadLine;
+    osites[I - 1] := str;
+    Match := RegularExpression.Match(str);
+    if Match.Success then
+    begin
+      str := Match.Value;
+      str := Trim(str);
+      splt := TRegEx.Split(str, regex2);
+      hip[I - 1] := splt[0];
+      hdomain[I - 1] := splt[1];
+      Continue;
+    end;
+    hip[I - 1] := '';
+    hdomain[I - 1] := '';
+  end;
+  rstrm.free;
+  wstrm := TStreamWriter.Create(host);
+  for I := Low(hip) to High(hip) do
+    if (hip[I] = ip1) then
+      wstrm.writeline(ip2+' '+hdomain[I])
+    else
+      wstrm.WriteLine(osites[I]);
+  wstrm.free;
+end;
+
 begin
   try
     host := GetEnvironmentVariable('WINDIR') + '\System32\drivers\etc\hosts';
@@ -466,10 +509,20 @@ begin
       begin
         FlushDNS;
       end;
+      if (ParamStr(1) = '/rip') and (ParamCount = 3) and
+        RegularExpression.IsMatch(ParamStr(2),
+        '(^(\w{0,4}:\w{0,4})+$)|(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)') and
+        RegularExpression.IsMatch(ParamStr(3),
+        '(^(\w{0,4}:\w{0,4})+$)|(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)')then
+      begin
+        Writeln('Replacing IP '+ParamStr(2) +' with '+ ParamStr(3)+' ...');
+        ReplaceIP(ParamStr(2),ParamStr(3));
+        Writeln('Done.');
+      end;
     end
     else
     begin
-      SetConsoleTitle('hostsedit 1.9');
+      SetConsoleTitle('hostsedit 2.0');
       Writeln('Command line utility for editing Windows HOSTS file.');
       Writeln('');
       Writeln('Usage :');
@@ -480,6 +533,7 @@ begin
       Writeln('  /rm    : Remove multiple entries, reading from text file.');
       Writeln('  /b     : Create backup of HOSTS file.');
       Writeln('  /fdns  : Flush Windows DNS Cache.');
+      Writeln('  /rip   : Replace IPs in HOSTS file.');
       Writeln('  /res   : Restore HOSTS file to Windows default, or to a previous backup.');
       Writeln('  /attr  : Set attributes for HOSTS file, ReadOnly(/attr r), Archive(/attr a), Both(/attr ra).');
       Writeln('');
@@ -491,6 +545,7 @@ begin
       Writeln('  hostsedit /rm "D:\HOSTS Entries\example.txt"');
       Writeln('  hostsedit /b "D:\HOSTS.BKP"');
       Writeln('  hostsedit /fdns');
+      Writeln('  hostsedit /rip 0.0.0.0 127.0.0.1');
       Writeln('  hostsedit /res');
       Writeln('  hostsedit /res "D:\HOSTS.BKP"');
       Writeln('  hostsedit /attr r');

@@ -101,8 +101,8 @@
         <DCC_ImportedDataReferences>false</DCC_ImportedDataReferences>
         <Icon_MainIcon>HostEdit_Icon1.ico</Icon_MainIcon>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=DELTA Software ;FileDescription=HostsEdit - Command line utility for editing Windows HOSTS file.;FileVersion=1.9.0.0;InternalName=;LegalCopyright=DELTA Software;LegalTrademarks=;OriginalFilename=hostsedit.exe;ProgramID=;ProductName=HostsEdit;ProductVersion=1.9.0.0;Comments=</VerInfo_Keys>
-        <VerInfo_MinorVer>9</VerInfo_MinorVer>
+        <VerInfo_Keys>CompanyName=DELTA Software ;FileDescription=HostsEdit - Command line utility for editing Windows HOSTS file.;FileVersion=2.0.0.0;InternalName=;LegalCopyright=DELTA Software;LegalTrademarks=;OriginalFilename=hostsedit.exe;ProgramID=;ProductName=HostsEdit;ProductVersion=2.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_MajorVer>2</VerInfo_MajorVer>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
