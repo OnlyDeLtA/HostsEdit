@@ -25,6 +25,7 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
   /rm    : Remove multiple entries, reading from text file.
   /b     : Create backup of HOSTS file.
   /fdns  : Flush Windows DNS Cache.
+  /rip   : Replace IPs in HOSTS file.
   /res   : Restore HOSTS file to Windows default, or to a previous backup.
   /attr  : Set attributes for HOSTS file, ReadOnly(/attr r), Archive(/attr a), Both(/attr ra).
 ```
@@ -36,6 +37,7 @@ HostsEdit is a command-line utility for editing Windows HOSTS file. it can be us
   hostsedit /rm "D:\HOSTS Entries\example.txt"
   hostsedit /b "D:\HOSTS.BKP"
   hostsedit /fdns
+  hostsedit /rip 0.0.0.0 127.0.0.1
   hostsedit /res
   hostsedit /res "D:\HOSTS.BKP"
   hostsedit /attr r
