@@ -22,7 +22,7 @@ begin
   Sleep(500);
 end;
 
-function CheckStr(str: string; sites: array of string): Boolean;
+function CheckStr(const str: string; const sites: array of string): Boolean;
 var
   I: Integer;
 begin
@@ -98,10 +98,9 @@ procedure Add(ip: String; domain: String);
 var
   rstrm: TStreamReader;
   wstrm: TStreamWriter;
-  hip, hdomain, osites: array of string;
-  I: Integer;
   splt: TStringDynArray;
-  str: string;
+  hdomain, osites: array of string;
+  I: Integer;
   exists: Boolean;
 begin
   if not FileExists(host) then
@@ -113,18 +112,13 @@ begin
   while not(rstrm.endofstream) do
   begin
     inc(I, 1);
-    SetLength(hip, I);
     SetLength(hdomain, I);
     SetLength(osites, I);
-    str := rstrm.ReadLine;
-    osites[I - 1] := str;
-    Match := RegularExpression.Match(str);
+    osites[I - 1] := rstrm.ReadLine;
+    Match := RegularExpression.Match(osites[I - 1]);
     if Match.Success then
     begin
-      str := Match.Value;
-      str := Trim(str);
-      splt := TRegEx.Split(str, regex2);
-      hip[I - 1] := splt[0];
+      splt := TRegEx.Split(Trim(Match.Value), regex2);
       hdomain[I - 1] := splt[1];
       if (CompareText(hdomain[I - 1], domain) = 0) and (exists = False) then
       begin
@@ -134,18 +128,17 @@ begin
       end
       else if (CompareText(hdomain[I - 1], domain) = 0) and (exists = True) then
       begin
-        hip[I - 1] := 'removed';
+        hdomain[I - 1] := '#';
       end;
       Continue;
     end;
-    hip[I - 1] := '';
     hdomain[I - 1] := '';
   end;
   rstrm.free;
   wstrm := TStreamWriter.Create(host);
 
-  for I := Low(hip) to High(hip) do
-    if (hip[I] <> 'removed') then
+  for I := Low(hdomain) to High(hdomain) do
+    if (hdomain[I] <> '#') then
       wstrm.writeline(osites[I]);
 
   if not exists then
@@ -157,32 +150,28 @@ end;
 procedure Remove(site: string);
 var
   hsites, osites: array of string;
+  splt: TStringDynArray;
   rstrm: TStreamReader;
   wstrm: TStreamWriter;
   I: Integer;
-  str: string;
 begin
   RegularExpression.Create(regex1);
   I := 0;
   rstrm := TStreamReader.Create(host);
   while not(rstrm.endofstream) do
   begin
-    str := rstrm.ReadLine;
-    Match := RegularExpression.Match(str);
     inc(I, 1);
     SetLength(hsites, I);
     SetLength(osites, I);
-    osites[I - 1] := str;
+    osites[I - 1] := rstrm.ReadLine;
+    Match := RegularExpression.Match(osites[I - 1]);
     if Match.Success then
     begin
-      str := Match.Value;
-      str := TRegEx.Replace(str,
-        '(^\s*(\w{0,4}:\w{0,4})+\s+)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
-        '');
-      hsites[I - 1] := str;
+      splt := TRegEx.Split(Trim(Match.Value), regex2);
+      hsites[I - 1] := splt[1];
       Continue;
     end;
-    hsites[I - 1] := str;
+    hsites[I - 1] := '';
   end;
   rstrm.free;
   wstrm := TStreamWriter.Create(host);
@@ -197,8 +186,7 @@ var
   rstrm: TStreamReader;
   wstrm: TStreamWriter;
   splt: TStringDynArray;
-  ip, domain, hip, hdomain, osites, aip, adomain: array of string;
-  str: string;
+  ip, domain, hdomain, osites, aip, adomain: array of string;
   I, J, K: Integer;
   exists: Boolean;
 begin
@@ -211,22 +199,16 @@ begin
   while not(rstrm.endofstream) do
   begin
     inc(I, 1);
-    SetLength(hip, I);
     SetLength(hdomain, I);
     SetLength(osites, I);
-    str := rstrm.ReadLine;
-    osites[I - 1] := str;
-    Match := RegularExpression.Match(str);
+    osites[I - 1] := rstrm.ReadLine;
+    Match := RegularExpression.Match(osites[I - 1]);
     if Match.Success then
     begin
-      str := Match.Value;
-      str := Trim(str);
-      splt := TRegEx.Split(str, regex2);
-      hip[I - 1] := splt[0];
+      splt := TRegEx.Split(Trim(Match.Value), regex2);
       hdomain[I - 1] := splt[1];
       Continue;
     end;
-    hip[I - 1] := '';
     hdomain[I - 1] := '';
   end;
   rstrm.free;
@@ -234,16 +216,13 @@ begin
   rstrm := TStreamReader.Create(lhost);
   while not(rstrm.endofstream) do
   begin
-    str := rstrm.ReadLine;
-    Match := RegularExpression.Match(str);
+    Match := RegularExpression.Match(rstrm.ReadLine);
     if Match.Success then
     begin
       inc(I, 1);
       SetLength(ip, I);
       SetLength(domain, I);
-      str := Match.Value;
-      str := Trim(str);
-      splt := TRegEx.Split(str, regex2);
+      splt := TRegEx.Split(Trim(Match.Value), regex2);
       ip[I - 1] := splt[0];
       domain[I - 1] := splt[1];
     end;
@@ -262,7 +241,7 @@ begin
       end
       else if (CompareText(hdomain[J], domain[I]) = 0) and (exists = True) then
       begin
-        hip[J] := 'removed';
+        hdomain[J] := '#';
       end;
 
     end;
@@ -278,8 +257,8 @@ begin
   end;
 
   wstrm := TStreamWriter.Create(host);
-  for I := Low(hip) to High(hip) do
-    if (hip[I] <> 'removed') then
+  for I := Low(hdomain) to High(hdomain) do
+    if (hdomain[I] <> '#') then
       wstrm.writeline(osites[I]);
   for I := Low(adomain) to High(adomain) do
     wstrm.writeline(aip[I] + ' ' + adomain[I]);
@@ -291,6 +270,7 @@ var
   sites, hsites, osites: array of string;
   rstrm: TStreamReader;
   wstrm: TStreamWriter;
+  splt: TStringDynArray;
   AltRegularExpression: TRegEx;
   AltMatch: TMatch;
   str: string;
@@ -309,19 +289,14 @@ begin
     begin
       inc(I, 1);
       SetLength(sites, I);
-      str := Match.Value;
-      str := TRegEx.Replace(str,
-        '(^\s*(\w{0,4}:\w{0,4})+\s+)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
-        '');
-      sites[I - 1] := str;
+      splt := TRegEx.Split(Trim(Match.Value), regex2);
+      sites[I - 1] := splt[1];
     end
     else if AltMatch.Success then
     begin
       inc(I, 1);
       SetLength(sites, I);
-      str := AltMatch.Value;
-      str := Trim(str);
-      sites[I - 1] := str;
+      sites[I - 1] := Trim(AltMatch.Value);
     end;
   end;
   rstrm.free;
@@ -329,22 +304,18 @@ begin
   rstrm := TStreamReader.Create(host);
   while not(rstrm.endofstream) do
   begin
-    str := rstrm.ReadLine;
-    Match := RegularExpression.Match(str);
     inc(I, 1);
     SetLength(hsites, I);
     SetLength(osites, I);
-    osites[I - 1] := str;
+    osites[I - 1] := rstrm.ReadLine;
+    Match := RegularExpression.Match(osites[I - 1]);
     if Match.Success then
     begin
-      str := Match.Value;
-      str := TRegEx.Replace(str,
-        '(^\s*(\w{0,4}:\w{0,4})+\s+)|(^\s*\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+)',
-        '');
-      hsites[I - 1] := str;
+      splt := TRegEx.Split(Trim(Match.Value), regex2);
+      hsites[I - 1] := splt[1];
       Continue;
     end;
-    hsites[I - 1] := str;
+    hsites[I - 1] := '';
   end;
   rstrm.free;
   wstrm := TStreamWriter.Create(host);
@@ -373,7 +344,10 @@ begin
   rstrm.free;
   if (not DirectoryExists(ExtractFileDir(loc))) and
     (not ExtractFileDir(loc).IsEmpty) then
+  begin
+    Sleep(500);
     ForceDirectories(ExtractFileDir(loc));
+  end;
 
   wstrm := TStreamWriter.Create(loc);
   for I := Low(hsites) to High(hsites) do
@@ -391,13 +365,12 @@ begin
     FileSetAttr(host, faArchive);
 end;
 
-procedure ReplaceIP(ip1: string; ip2:string);
+procedure ReplaceIP(ip1: string; ip2: string);
 var
   rstrm: TStreamReader;
   wstrm: TStreamWriter;
   splt: TStringDynArray;
   hip, hdomain, osites: array of string;
-  str: string;
   I: Integer;
 begin
   RegularExpression.Create(regex1);
@@ -409,14 +382,11 @@ begin
     SetLength(hip, I);
     SetLength(hdomain, I);
     SetLength(osites, I);
-    str := rstrm.ReadLine;
-    osites[I - 1] := str;
-    Match := RegularExpression.Match(str);
+    osites[I - 1] := rstrm.ReadLine;
+    Match := RegularExpression.Match(osites[I - 1]);
     if Match.Success then
     begin
-      str := Match.Value;
-      str := Trim(str);
-      splt := TRegEx.Split(str, regex2);
+      splt := TRegEx.Split(Trim(Match.Value), regex2);
       hip[I - 1] := splt[0];
       hdomain[I - 1] := splt[1];
       Continue;
@@ -428,9 +398,9 @@ begin
   wstrm := TStreamWriter.Create(host);
   for I := Low(hip) to High(hip) do
     if (hip[I] = ip1) then
-      wstrm.writeline(ip2+' '+hdomain[I])
+      wstrm.writeline(ip2 + ' ' + hdomain[I])
     else
-      wstrm.WriteLine(osites[I]);
+      wstrm.writeline(osites[I]);
   wstrm.free;
 end;
 
@@ -439,7 +409,7 @@ begin
     host := GetEnvironmentVariable('WINDIR') + '\System32\drivers\etc\hosts';
     if ParamCount <> 0 then
     begin
-      if (ParamStr(1) = '/a') and (ParamCount = 3) and
+      if (LowerCase(ParamStr(1)) = '/a') and (ParamCount = 3) and
         RegularExpression.IsMatch(ParamStr(2),
         '(^(\w{0,4}:\w{0,4})+$)|(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)') then
       begin
@@ -451,7 +421,7 @@ begin
           FileSetAttr(host, attrib);
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/r') and (ParamCount = 2) then
+      if (LowerCase(ParamStr(1)) = '/r') and (ParamCount = 2) then
       begin
         Writeln('Removing entry from HOSTS file...');
         attrib := FileGetAttr(host);
@@ -460,7 +430,7 @@ begin
         FileSetAttr(host, attrib);
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/am') and (ParamCount = 2) then
+      if (LowerCase(ParamStr(1)) = '/am') and (ParamCount = 2) then
       begin
         Writeln('Adding entries to HOSTS file...');
         attrib := FileGetAttr(host);
@@ -470,7 +440,7 @@ begin
           FileSetAttr(host, attrib);
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/rm') and (ParamCount = 2) then
+      if (LowerCase(ParamStr(1)) = '/rm') and (ParamCount = 2) then
       begin
         Writeln('Removing entries from HOSTS file...');
         attrib := FileGetAttr(host);
@@ -479,50 +449,52 @@ begin
         FileSetAttr(host, attrib);
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/b') and (ParamCount = 2) then
+      if (LowerCase(ParamStr(1)) = '/b') and (ParamCount = 2) then
       begin
         Writeln('Creating HOSTS file backup...');
         Backup(ParamStr(2));
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/res') and (ParamCount = 2) then
+      if (LowerCase(ParamStr(1)) = '/res') and (ParamCount = 2) then
       begin
         Writeln('Restoring HOSTS file...');
         FileSetAttr(host, faArchive);
         Restore(ParamStr(2));
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/res') and (ParamCount = 1) then
+      if (LowerCase(ParamStr(1)) = '/res') and (ParamCount = 1) then
       begin
         Writeln('Restoring HOSTS file...');
         FileSetAttr(host, faArchive);
         Restore;
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/attr') and (ParamCount = 2) then
+      if (LowerCase(ParamStr(1)) = '/attr') and (ParamCount = 2) then
       begin
         Writeln('Changing Attributes for HOSTS file...');
-        SetAttrib(ParamStr(2));
+        SetAttrib(LowerCase(ParamStr(2)));
         Writeln('Done.');
       end;
-      if (ParamStr(1) = '/fdns') and (ParamCount = 1) then
+      if (LowerCase(ParamStr(1)) = '/fdns') and (ParamCount = 1) then
       begin
         FlushDNS;
       end;
-      if (ParamStr(1) = '/rip') and (ParamCount = 3) and
+      if (LowerCase(ParamStr(1)) = '/rip') and (ParamCount = 3) and
         RegularExpression.IsMatch(ParamStr(2),
         '(^(\w{0,4}:\w{0,4})+$)|(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)') and
         RegularExpression.IsMatch(ParamStr(3),
-        '(^(\w{0,4}:\w{0,4})+$)|(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)')then
+        '(^(\w{0,4}:\w{0,4})+$)|(^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$)') then
       begin
-        Writeln('Replacing IP '+ParamStr(2) +' with '+ ParamStr(3)+' ...');
-        ReplaceIP(ParamStr(2),ParamStr(3));
+        Writeln('Replacing IP ' + ParamStr(2) + ' with ' + ParamStr(3)
+          + ' ...');
+        ReplaceIP(ParamStr(2), ParamStr(3));
         Writeln('Done.');
       end;
+
     end
     else
     begin
-      SetConsoleTitle('hostsedit 2.0');
+      SetConsoleTitle('hostsedit 2.1');
       Writeln('Command line utility for editing Windows HOSTS file.');
       Writeln('');
       Writeln('Usage :');
