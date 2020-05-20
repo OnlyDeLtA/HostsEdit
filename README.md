@@ -90,11 +90,11 @@ Filename: "{app}\hostsedit.exe"; Parameters: "/am ""{app}\test.txt"""; Flags: ru
 Filename: "{app}\hostsedit.exe"; Parameters: "/rm ""{app}\test.txt"""; Flags: runhidden;
 ```
 <p align="center">
-<img src="https://i.imgur.com/eyE2JTb.png">
+<img src="https://i.imgur.com/I4106HR.png">
 </p>
 
 ## Download 
- * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/2.1)
+ * [Download Latest Version](https://github.com/OnlyDeLtA/HostsEdit/releases/tag/2.2)
  * [Download Older Versions](https://github.com/OnlyDeLtA/HostsEdit/releases)
  
   *For Windows XP, Vista, 7, 8, 8.1, 10 (32\64-bit)*

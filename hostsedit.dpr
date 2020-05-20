@@ -4,8 +4,11 @@ program hostsedit;
 {$R *.res}
 
 uses
-  System.SysUtils, Winapi.Windows, System.Types, System.Classes,
+  System.SysUtils, Winapi.Windows, System.Classes,
   System.RegularExpressions;
+
+type
+TStringDynArray=TArray<string>;
 
 var
   host: string;
@@ -42,55 +45,64 @@ begin
   if loc = '' then
   begin
     wstrm := TStreamWriter.Create(host);
-    wstrm.writeline('# Copyright (c) 1993-2009 Microsoft Corp.');
-    wstrm.writeline('#');
-    wstrm.writeline
-      ('# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.');
-    wstrm.writeline('#');
-    wstrm.writeline
-      ('# This file contains the mappings of IP addresses to host names. Each');
-    wstrm.writeline
-      ('# entry should be kept on an individual line. The IP address should');
-    wstrm.writeline
-      ('# be placed in the first column followed by the corresponding host name.');
-    wstrm.writeline
-      ('# The IP address and the host name should be separated by at least one');
-    wstrm.writeline('# space.');
-    wstrm.writeline('#');
-    wstrm.writeline
-      ('# Additionally, comments (such as these) may be inserted on individual');
-    wstrm.writeline
-      ('# lines or following the machine name denoted by a ''#'' symbol.');
-    wstrm.writeline('#');
-    wstrm.writeline('# For example:');
-    wstrm.writeline('#');
-    wstrm.writeline
-      ('#      102.54.94.97     rhino.acme.com          # source server');
-    wstrm.writeline
-      ('#       38.25.63.10     x.acme.com              # x client host');
-    wstrm.writeline('');
-    wstrm.writeline
-      ('# localhost name resolution is handled within DNS itself.');
-    wstrm.writeline('#	127.0.0.1       localhost');
-    wstrm.writeline('#	::1             localhost');
-    wstrm.free;
+    try
+      wstrm.writeline('# Copyright (c) 1993-2009 Microsoft Corp.');
+      wstrm.writeline('#');
+      wstrm.writeline
+        ('# This is a sample HOSTS file used by Microsoft TCP/IP for Windows.');
+      wstrm.writeline('#');
+      wstrm.writeline
+        ('# This file contains the mappings of IP addresses to host names. Each');
+      wstrm.writeline
+        ('# entry should be kept on an individual line. The IP address should');
+      wstrm.writeline
+        ('# be placed in the first column followed by the corresponding host name.');
+      wstrm.writeline
+        ('# The IP address and the host name should be separated by at least one');
+      wstrm.writeline('# space.');
+      wstrm.writeline('#');
+      wstrm.writeline
+        ('# Additionally, comments (such as these) may be inserted on individual');
+      wstrm.writeline
+        ('# lines or following the machine name denoted by a ''#'' symbol.');
+      wstrm.writeline('#');
+      wstrm.writeline('# For example:');
+      wstrm.writeline('#');
+      wstrm.writeline
+        ('#      102.54.94.97     rhino.acme.com          # source server');
+      wstrm.writeline
+        ('#       38.25.63.10     x.acme.com              # x client host');
+      wstrm.writeline('');
+      wstrm.writeline
+        ('# localhost name resolution is handled within DNS itself.');
+      wstrm.writeline('#	127.0.0.1       localhost');
+      wstrm.writeline('#	::1             localhost');
+    finally
+      wstrm.free;
+    end;
   end
   else
   begin
     I := 0;
     rstrm := TStreamReader.Create(loc);
-    while not(rstrm.endofstream) do
-    begin
-      inc(I, 1);
-      SetLength(sites, I);
-      sites[I - 1] := rstrm.ReadLine;
+    try
+      while not(rstrm.endofstream) do
+      begin
+        inc(I, 1);
+        SetLength(sites, I);
+        sites[I - 1] := rstrm.ReadLine;
+      end;
+    finally
+      rstrm.free;
     end;
-    rstrm.free;
 
     wstrm := TStreamWriter.Create(host);
-    for I := Low(sites) to High(sites) do
-      wstrm.writeline(sites[I]);
-    wstrm.free;
+    try
+      for I := Low(sites) to High(sites) do
+        wstrm.writeline(sites[I]);
+    finally
+      wstrm.free;
+    end;
   end;
 end;
 
@@ -106,45 +118,51 @@ begin
   if not FileExists(host) then
     Restore;
   exists := False;
-  RegularExpression.Create(regex1);
   I := 0;
+  RegularExpression := TRegEx.Create(regex1);
   rstrm := TStreamReader.Create(host);
-  while not(rstrm.endofstream) do
-  begin
-    inc(I, 1);
-    SetLength(hdomain, I);
-    SetLength(osites, I);
-    osites[I - 1] := rstrm.ReadLine;
-    Match := RegularExpression.Match(osites[I - 1]);
-    if Match.Success then
+  try
+    while not(rstrm.endofstream) do
     begin
-      splt := TRegEx.Split(Trim(Match.Value), regex2);
-      hdomain[I - 1] := splt[1];
-      if (CompareText(hdomain[I - 1], domain) = 0) and (exists = False) then
+      inc(I, 1);
+      SetLength(hdomain, I);
+      SetLength(osites, I);
+      osites[I - 1] := rstrm.ReadLine;
+      Match := RegularExpression.Match(osites[I - 1]);
+      if Match.Success then
       begin
-        exists := True;
-        osites[I - 1] := ip + ' ' + domain;
+        splt := TRegEx.Split(Trim(Match.Value), regex2);
+        hdomain[I - 1] := splt[1];
+        if (CompareText(hdomain[I - 1], domain) = 0) and (exists = False) then
+        begin
+          exists := True;
+          osites[I - 1] := ip + ' ' + domain;
 
-      end
-      else if (CompareText(hdomain[I - 1], domain) = 0) and (exists = True) then
-      begin
-        hdomain[I - 1] := '#';
+        end
+        else if (CompareText(hdomain[I - 1], domain) = 0) and (exists = True)
+        then
+        begin
+          hdomain[I - 1] := '#';
+        end;
+        Continue;
       end;
-      Continue;
+      hdomain[I - 1] := '';
     end;
-    hdomain[I - 1] := '';
+  finally
+    rstrm.free;
   end;
-  rstrm.free;
   wstrm := TStreamWriter.Create(host);
+  try
+    for I := Low(hdomain) to High(hdomain) do
+      if (hdomain[I] <> '#') then
+        wstrm.writeline(osites[I]);
 
-  for I := Low(hdomain) to High(hdomain) do
-    if (hdomain[I] <> '#') then
-      wstrm.writeline(osites[I]);
+    if not exists then
+      wstrm.writeline(ip + ' ' + domain);
+  finally
+    wstrm.free;
+  end;
 
-  if not exists then
-    wstrm.writeline(ip + ' ' + domain);
-
-  wstrm.free;
 end;
 
 procedure Remove(site: string);
@@ -155,30 +173,36 @@ var
   wstrm: TStreamWriter;
   I: Integer;
 begin
-  RegularExpression.Create(regex1);
   I := 0;
+  RegularExpression := TRegEx.Create(regex1);
   rstrm := TStreamReader.Create(host);
-  while not(rstrm.endofstream) do
-  begin
-    inc(I, 1);
-    SetLength(hsites, I);
-    SetLength(osites, I);
-    osites[I - 1] := rstrm.ReadLine;
-    Match := RegularExpression.Match(osites[I - 1]);
-    if Match.Success then
+  try
+    while not(rstrm.endofstream) do
     begin
-      splt := TRegEx.Split(Trim(Match.Value), regex2);
-      hsites[I - 1] := splt[1];
-      Continue;
+      inc(I, 1);
+      SetLength(hsites, I);
+      SetLength(osites, I);
+      osites[I - 1] := rstrm.ReadLine;
+      Match := RegularExpression.Match(osites[I - 1]);
+      if Match.Success then
+      begin
+        splt := TRegEx.Split(Trim(Match.Value), regex2);
+        hsites[I - 1] := splt[1];
+        Continue;
+      end;
+      hsites[I - 1] := '';
     end;
-    hsites[I - 1] := '';
+  finally
+    rstrm.free;
   end;
-  rstrm.free;
   wstrm := TStreamWriter.Create(host);
-  for I := Low(hsites) to High(hsites) do
-    if CompareText(hsites[I], site) <> 0 then
-      wstrm.writeline(osites[I]);
-  wstrm.free;
+  try
+    for I := Low(hsites) to High(hsites) do
+      if CompareText(hsites[I], site) <> 0 then
+        wstrm.writeline(osites[I]);
+  finally
+    wstrm.free;
+  end;
 end;
 
 procedure AddFromText(lhost: String);
@@ -192,42 +216,48 @@ var
 begin
   if not FileExists(host) then
     Restore;
-  RegularExpression.Create(regex1);
+  RegularExpression := TRegEx.Create(regex1);
   I := 0;
   K := 0;
   rstrm := TStreamReader.Create(host);
-  while not(rstrm.endofstream) do
-  begin
-    inc(I, 1);
-    SetLength(hdomain, I);
-    SetLength(osites, I);
-    osites[I - 1] := rstrm.ReadLine;
-    Match := RegularExpression.Match(osites[I - 1]);
-    if Match.Success then
-    begin
-      splt := TRegEx.Split(Trim(Match.Value), regex2);
-      hdomain[I - 1] := splt[1];
-      Continue;
-    end;
-    hdomain[I - 1] := '';
-  end;
-  rstrm.free;
-  I := 0;
-  rstrm := TStreamReader.Create(lhost);
-  while not(rstrm.endofstream) do
-  begin
-    Match := RegularExpression.Match(rstrm.ReadLine);
-    if Match.Success then
+  try
+    while not(rstrm.endofstream) do
     begin
       inc(I, 1);
-      SetLength(ip, I);
-      SetLength(domain, I);
-      splt := TRegEx.Split(Trim(Match.Value), regex2);
-      ip[I - 1] := splt[0];
-      domain[I - 1] := splt[1];
+      SetLength(hdomain, I);
+      SetLength(osites, I);
+      osites[I - 1] := rstrm.ReadLine;
+      Match := RegularExpression.Match(osites[I - 1]);
+      if Match.Success then
+      begin
+        splt := TRegEx.Split(Trim(Match.Value), regex2);
+        hdomain[I - 1] := splt[1];
+        Continue;
+      end;
+      hdomain[I - 1] := '';
     end;
+  finally
+    rstrm.free;
   end;
-  rstrm.free;
+  I := 0;
+  rstrm := TStreamReader.Create(lhost);
+  try
+    while not(rstrm.endofstream) do
+    begin
+      Match := RegularExpression.Match(rstrm.ReadLine);
+      if Match.Success then
+      begin
+        inc(I, 1);
+        SetLength(ip, I);
+        SetLength(domain, I);
+        splt := TRegEx.Split(Trim(Match.Value), regex2);
+        ip[I - 1] := splt[0];
+        domain[I - 1] := splt[1];
+      end;
+    end;
+  finally
+    rstrm.free;
+  end;
   for I := Low(domain) to High(domain) do
   begin
     exists := False;
@@ -257,12 +287,15 @@ begin
   end;
 
   wstrm := TStreamWriter.Create(host);
-  for I := Low(hdomain) to High(hdomain) do
-    if (hdomain[I] <> '#') then
-      wstrm.writeline(osites[I]);
-  for I := Low(adomain) to High(adomain) do
-    wstrm.writeline(aip[I] + ' ' + adomain[I]);
-  wstrm.free;
+  try
+    for I := Low(hdomain) to High(hdomain) do
+      if (hdomain[I] <> '#') then
+        wstrm.writeline(osites[I]);
+    for I := Low(adomain) to High(adomain) do
+      wstrm.writeline(aip[I] + ' ' + adomain[I]);
+  finally
+    wstrm.free;
+  end;
 end;
 
 procedure RemoveFromText(lhost: String);
@@ -276,53 +309,62 @@ var
   str: string;
   I: Integer;
 begin
-  RegularExpression.Create(regex1);
-  AltRegularExpression.Create('^\s*[^#\s]+');
+  RegularExpression := TRegEx.Create(regex1);
+  AltRegularExpression := TRegEx.Create('^\s*[^#\s]+');
   I := 0;
   rstrm := TStreamReader.Create(lhost);
-  while not(rstrm.endofstream) do
-  begin
-    str := rstrm.ReadLine;
-    Match := RegularExpression.Match(str);
-    AltMatch := AltRegularExpression.Match(str);
-    if Match.Success then
+  try
+    while not(rstrm.endofstream) do
     begin
-      inc(I, 1);
-      SetLength(sites, I);
-      splt := TRegEx.Split(Trim(Match.Value), regex2);
-      sites[I - 1] := splt[1];
-    end
-    else if AltMatch.Success then
-    begin
-      inc(I, 1);
-      SetLength(sites, I);
-      sites[I - 1] := Trim(AltMatch.Value);
+      str := rstrm.ReadLine;
+      Match := RegularExpression.Match(str);
+      AltMatch := AltRegularExpression.Match(str);
+      if Match.Success then
+      begin
+        inc(I, 1);
+        SetLength(sites, I);
+        splt := TRegEx.Split(Trim(Match.Value), regex2);
+        sites[I - 1] := splt[1];
+      end
+      else if AltMatch.Success then
+      begin
+        inc(I, 1);
+        SetLength(sites, I);
+        sites[I - 1] := Trim(AltMatch.Value);
+      end;
     end;
+  finally
+    rstrm.free;
   end;
-  rstrm.free;
   I := 0;
   rstrm := TStreamReader.Create(host);
-  while not(rstrm.endofstream) do
-  begin
-    inc(I, 1);
-    SetLength(hsites, I);
-    SetLength(osites, I);
-    osites[I - 1] := rstrm.ReadLine;
-    Match := RegularExpression.Match(osites[I - 1]);
-    if Match.Success then
+  try
+    while not(rstrm.endofstream) do
     begin
-      splt := TRegEx.Split(Trim(Match.Value), regex2);
-      hsites[I - 1] := splt[1];
-      Continue;
+      inc(I, 1);
+      SetLength(hsites, I);
+      SetLength(osites, I);
+      osites[I - 1] := rstrm.ReadLine;
+      Match := RegularExpression.Match(osites[I - 1]);
+      if Match.Success then
+      begin
+        splt := TRegEx.Split(Trim(Match.Value), regex2);
+        hsites[I - 1] := splt[1];
+        Continue;
+      end;
+      hsites[I - 1] := '';
     end;
-    hsites[I - 1] := '';
+  finally
+    rstrm.free;
   end;
-  rstrm.free;
   wstrm := TStreamWriter.Create(host);
-  for I := Low(hsites) to High(hsites) do
-    if CheckStr(hsites[I], sites) then
-      wstrm.writeline(osites[I]);
-  wstrm.free;
+  try
+    for I := Low(hsites) to High(hsites) do
+      if CheckStr(hsites[I], sites) then
+        wstrm.writeline(osites[I]);
+  finally
+    wstrm.free;
+  end;
 end;
 
 procedure Backup(loc: String);
@@ -334,14 +376,17 @@ var
 begin
   I := 0;
   rstrm := TStreamReader.Create(host);
-  while not(rstrm.endofstream) do
-  begin
-    inc(I, 1);
-    SetLength(hsites, I);
-    hsites[I - 1] := rstrm.ReadLine;
+  try
+    while not(rstrm.endofstream) do
+    begin
+      inc(I, 1);
+      SetLength(hsites, I);
+      hsites[I - 1] := rstrm.ReadLine;
+    end;
+  finally
+    rstrm.free;
   end;
 
-  rstrm.free;
   if (not DirectoryExists(ExtractFileDir(loc))) and
     (not ExtractFileDir(loc).IsEmpty) then
   begin
@@ -350,9 +395,12 @@ begin
   end;
 
   wstrm := TStreamWriter.Create(loc);
-  for I := Low(hsites) to High(hsites) do
-    wstrm.writeline(hsites[I]);
-  wstrm.free;
+  try
+    for I := Low(hsites) to High(hsites) do
+      wstrm.writeline(hsites[I]);
+  finally
+    wstrm.free;
+  end;
 end;
 
 procedure SetAttrib(attrib: String);
@@ -373,35 +421,41 @@ var
   hip, hdomain, osites: array of string;
   I: Integer;
 begin
-  RegularExpression.Create(regex1);
+  RegularExpression := TRegEx.Create(regex1);
   I := 0;
   rstrm := TStreamReader.Create(host);
-  while not(rstrm.endofstream) do
-  begin
-    inc(I, 1);
-    SetLength(hip, I);
-    SetLength(hdomain, I);
-    SetLength(osites, I);
-    osites[I - 1] := rstrm.ReadLine;
-    Match := RegularExpression.Match(osites[I - 1]);
-    if Match.Success then
+  try
+    while not(rstrm.endofstream) do
     begin
-      splt := TRegEx.Split(Trim(Match.Value), regex2);
-      hip[I - 1] := splt[0];
-      hdomain[I - 1] := splt[1];
-      Continue;
+      inc(I, 1);
+      SetLength(hip, I);
+      SetLength(hdomain, I);
+      SetLength(osites, I);
+      osites[I - 1] := rstrm.ReadLine;
+      Match := RegularExpression.Match(osites[I - 1]);
+      if Match.Success then
+      begin
+        splt := TRegEx.Split(Trim(Match.Value), regex2);
+        hip[I - 1] := splt[0];
+        hdomain[I - 1] := splt[1];
+        Continue;
+      end;
+      hip[I - 1] := '';
+      hdomain[I - 1] := '';
     end;
-    hip[I - 1] := '';
-    hdomain[I - 1] := '';
+  finally
+    rstrm.free;
   end;
-  rstrm.free;
   wstrm := TStreamWriter.Create(host);
-  for I := Low(hip) to High(hip) do
-    if (hip[I] = ip1) then
-      wstrm.writeline(ip2 + ' ' + hdomain[I])
-    else
-      wstrm.writeline(osites[I]);
-  wstrm.free;
+  try
+    for I := Low(hip) to High(hip) do
+      if (hip[I] = ip1) then
+        wstrm.writeline(ip2 + ' ' + hdomain[I])
+      else
+        wstrm.writeline(osites[I]);
+  finally
+    wstrm.free;
+  end;
 end;
 
 begin
@@ -494,7 +548,7 @@ begin
     end
     else
     begin
-      SetConsoleTitle('hostsedit 2.1');
+      SetConsoleTitle('hostsedit 2.2');
       Writeln('Command line utility for editing Windows HOSTS file.');
       Writeln('');
       Writeln('Usage :');
